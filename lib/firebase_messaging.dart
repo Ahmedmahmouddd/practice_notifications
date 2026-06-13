@@ -71,10 +71,6 @@ class FirebaseMessagingService {
       sound: true,
     );
 
-    /// Handle background messages
-    /// without this, notification will not be sent at all
-    FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
-
     /// Handle messages when app is killed
     /// if removed, notification will still show but no action will be done on opening message
     _firebaseMessaging.getInitialMessage().then(handleKilledAppMessage);
