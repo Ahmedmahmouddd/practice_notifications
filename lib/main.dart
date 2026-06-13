@@ -2,11 +2,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:practice_notifications/firebase_messaging.dart';
 import 'package:practice_notifications/firebase_options.dart';
+import 'package:practice_notifications/pages/background_app_notification_screen.dart';
+import 'package:practice_notifications/pages/foreground_app_notification_screen.dart';
 import 'package:practice_notifications/pages/home_screen.dart';
-import 'package:practice_notifications/pages/notification_screen.dart';
+import 'package:practice_notifications/pages/killed_app_notification_screen.dart';
 
 // Global navigator key
-final _navigatorKey = GlobalKey<NavigatorState>();
+final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,9 +23,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey: _navigatorKey,
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.white,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white,
+          centerTitle: true,
+        ),
+      ),
       home: HomeScreen(),
-      routes: {NotificationScreen.route: (context) => NotificationScreen()},
+      navigatorKey: navigatorKey,
+      routes: {
+        KilledAppNotificationScreen.route: (context) =>
+            KilledAppNotificationScreen(),
+        BackGroundAppNotificationScreen.route: (context) =>
+            BackGroundAppNotificationScreen(),
+        ForegroundAppNotificationScreen.route: (context) =>
+            ForegroundAppNotificationScreen(),
+      },
     );
   }
 }
