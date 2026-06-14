@@ -1,5 +1,5 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:practice_notifications/model/notification_model.dart';
 
 class ForegroundAppNotificationScreen extends StatelessWidget {
   const ForegroundAppNotificationScreen({super.key});
@@ -8,8 +8,8 @@ class ForegroundAppNotificationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final message =
-        ModalRoute.of(context)?.settings.arguments as RemoteMessage?;
+    final model =
+        ModalRoute.of(context)?.settings.arguments as NotificationModel?;
 
     return Scaffold(
       appBar: AppBar(title: Text('Foreground App Notification')),
@@ -17,9 +17,8 @@ class ForegroundAppNotificationScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(message?.notification?.title ?? 'No Title'),
-            Text(message?.notification?.body ?? 'No Body'),
-            Text(message?.data.toString() ?? 'No Data'),
+            Text(model?.title ?? 'No Title'),
+            Text(model?.body ?? 'No Body'),
           ],
         ),
       ),

@@ -2,9 +2,10 @@ import 'dart:developer';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:practice_notifications/main.dart';
+import 'package:practice_notifications/model/notification_model.dart';
 import 'package:practice_notifications/pages/background_app_notification_screen.dart';
-import 'package:practice_notifications/pages/foreground_app_notification_screen.dart';
 import 'package:practice_notifications/pages/killed_app_notification_screen.dart';
+import 'package:practice_notifications/services/local_notifications.dart';
 
 @pragma('vm:entry-point')
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
@@ -12,7 +13,14 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
 }
 
 class FirebaseMessagingService {
+  FirebaseMessagingService._();
+  static final FirebaseMessagingService instance = FirebaseMessagingService._();
+
   final _firebaseMessaging = FirebaseMessaging.instance;
+
+  // Channel is defined and registered on the device in LocalNotificationsService.
+  // When we show a foreground notification, we pass androidNotificationChannel.id
+  // into AndroidNotificationDetails (next step).
 
   Future<void> init() async {
     await _firebaseMessaging.requestPermission();
@@ -22,6 +30,7 @@ class FirebaseMessagingService {
     initPushNotifications();
   }
 
+  /// handle onMessageOpenedApp event
   void handleBackgroundAppMessage(RemoteMessage? message) {
     if (message == null) return;
 
@@ -36,6 +45,7 @@ class FirebaseMessagingService {
     );
   }
 
+  /// handle onMessage event
   void handleForegroundAppMessage(RemoteMessage? message) {
     if (message == null) return;
 
@@ -44,12 +54,17 @@ class FirebaseMessagingService {
     log("Body: ${message.notification?.body.toString()}");
     log("Data: ${message.data.toString()}");
 
-    navigatorKey.currentState?.pushNamed(
-      ForegroundAppNotificationScreen.route,
-      arguments: message,
+    final model = NotificationModel.fromRemoteMessage(message);
+
+    LocalNotificationsService.instance.showNotification(
+      id: message.notification.hashCode,
+      title: message.notification?.title,
+      body: message.notification?.body,
+      payload: model.toPayload(),
     );
   }
 
+  /// handle onInitialMessage event
   void handleKilledAppMessage(RemoteMessage? message) {
     if (message == null) return;
 
@@ -76,7 +91,6 @@ class FirebaseMessagingService {
     _firebaseMessaging.getInitialMessage().then(handleKilledAppMessage);
 
     /// Handle messages when app is Alive in foreground
-    /// Shows no notification banner but navigates to the notification screen
     FirebaseMessaging.onMessage.listen(handleForegroundAppMessage);
 
     /// Handle messages when app is Alive in background

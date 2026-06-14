@@ -1,13 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:practice_notifications/firebase_messaging.dart';
 import 'package:practice_notifications/firebase_options.dart';
-import 'package:practice_notifications/local_notifications_service.dart';
 import 'package:practice_notifications/pages/background_app_notification_screen.dart';
 import 'package:practice_notifications/pages/foreground_app_notification_screen.dart';
 import 'package:practice_notifications/pages/home_screen.dart';
 import 'package:practice_notifications/pages/killed_app_notification_screen.dart';
+import 'package:practice_notifications/services/firebase_messaging.dart';
+import 'package:practice_notifications/services/local_notifications.dart';
 
 // Global navigator key
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -17,7 +17,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
   await LocalNotificationsService.instance.init();
-  await FirebaseMessagingService().init();
+  await FirebaseMessagingService.instance.init();
   runApp(const MyApp());
 }
 
