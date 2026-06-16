@@ -155,6 +155,7 @@ class LocalNotificationsService {
     required String? body,
     required String? payload,
     required tz.TZDateTime scheduledDate,
+    required DateTimeComponents? matchDateTimeComponents,
   }) async {
     if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
       debugPrint('Scheduled time already passed today.');
@@ -177,6 +178,7 @@ class LocalNotificationsService {
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.inexact,
+      matchDateTimeComponents: matchDateTimeComponents,
     );
   }
 

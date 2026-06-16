@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
-const Color _blue = Color(0xFF1976D2);
-const Color _grey = Color(0xFF9E9E9E);
-const Color _lightGrey = Color(0xFFF5F5F5);
+const Color appBlue = Color(0xFF1976D2);
+const Color appGrey = Color(0xFF9E9E9E);
+const Color appLightGrey = Color(0xFFF5F5F5);
+
+const Color _blue = appBlue;
+const Color _grey = appGrey;
+const Color _lightGrey = appLightGrey;
 
 Theme pickerTheme(BuildContext context, Widget? child) {
   return Theme(

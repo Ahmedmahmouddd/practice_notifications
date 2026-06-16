@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:practice_notifications/services/local_notifications.dart';
 import 'package:practice_notifications/widgets/custom_icon_button.dart';
 import 'package:practice_notifications/widgets/date_and_time_picker.dart';
+import 'package:practice_notifications/widgets/repeat_notification_dialog.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -66,15 +67,24 @@ class HomeScreen extends StatelessWidget {
                         final scheduledDate = await pickScheduleDateTime(
                           context,
                         );
-                        if (scheduledDate == null) return;
-                        LocalNotificationsService.instance
+                        if (scheduledDate == null || !context.mounted) return;
+
+                        final repeatOption = await showRepeatPickerDialog(
+                          context,
+                        );
+                        if (repeatOption == null || !context.mounted) return;
+
+                        await LocalNotificationsService.instance
                             .showSchedualedNotification(
                               id: 3,
                               title: "Scheduled Notification",
                               body:
-                                  'Scheduled for ${formatScheduleDateTime(scheduledDate)}',
+                                  'Scheduled for ${formatScheduleDateTime(scheduledDate)} ${repeatOption == RepeatOption.never ? '' : 'and will be repeated ${repeatOption.name.toLowerCase()}'}',
                               payload: "go_to_local_notification_screen",
                               scheduledDate: scheduledDate,
+                              matchDateTimeComponents: toMatchComponents(
+                                repeatOption,
+                              ),
                             );
                       },
 
