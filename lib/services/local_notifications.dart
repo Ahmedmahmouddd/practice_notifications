@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:practice_notifications/main.dart';
-import 'package:practice_notifications/model/notification_model.dart';
+import 'package:practice_notifications/models/notification_model.dart';
 import 'package:practice_notifications/pages/foreground_app_notification_screen.dart';
 import 'package:practice_notifications/pages/local_notification_screen.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotificationsService {
   /// private constructor — can't call from outside
@@ -43,6 +46,12 @@ class LocalNotificationsService {
     _handleNotificationTap(payload);
   }
 
+  Future<void> _configureLocalTimeZone() async {
+    tz.initializeTimeZones();
+    final timeZone = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timeZone.identifier));
+  }
+
   Future<void> init() async {
     await _plugin.initialize(
       settings: InitializationSettings(
@@ -77,6 +86,8 @@ class LocalNotificationsService {
           AndroidFlutterLocalNotificationsPlugin
         >()
         ?.requestNotificationsPermission();
+
+    await _configureLocalTimeZone();
   }
 
   static const AndroidNotificationChannel highImportanceChannel =
@@ -87,7 +98,7 @@ class LocalNotificationsService {
         importance: Importance.max,
       );
 
-  Future<void> showNotification({
+  Future<void> showInstantNotification({
     required int id,
     required String? title,
     required String? body,
@@ -109,5 +120,71 @@ class LocalNotificationsService {
         iOS: DarwinNotificationDetails(),
       ),
     );
+  }
+
+  Future<void> showPeriodicNotification({
+    required int id,
+    required String? title,
+    required String? body,
+    required String? payload,
+    required RepeatInterval repeatInterval,
+  }) async {
+    await _plugin.periodicallyShow(
+      id: id,
+      title: title,
+      body: body,
+      payload: payload,
+      repeatInterval: repeatInterval,
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          highImportanceChannel.id,
+          highImportanceChannel.name,
+          channelDescription: highImportanceChannel.description,
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexact,
+    );
+  }
+
+  Future<void> showSchedualedNotification({
+    required int id,
+    required String? title,
+    required String? body,
+    required String? payload,
+    required tz.TZDateTime scheduledDate,
+  }) async {
+    if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+      debugPrint('Scheduled time already passed today.');
+      return;
+    }
+    await _plugin.zonedSchedule(
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: scheduledDate,
+      payload: payload,
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          highImportanceChannel.id,
+          highImportanceChannel.name,
+          channelDescription: highImportanceChannel.description,
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexact,
+    );
+  }
+
+  Future<void> cancelNotification(int id) async {
+    await _plugin.cancel(id: id);
+  }
+
+  Future<void> cancelAllNotifications() async {
+    await _plugin.cancelAll();
   }
 }

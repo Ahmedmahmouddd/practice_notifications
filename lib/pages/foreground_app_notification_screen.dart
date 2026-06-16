@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:practice_notifications/model/notification_model.dart';
+import 'package:practice_notifications/models/notification_model.dart';
 
 class ForegroundAppNotificationScreen extends StatelessWidget {
   const ForegroundAppNotificationScreen({super.key});

@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:practice_notifications/main.dart';
-import 'package:practice_notifications/model/notification_model.dart';
+import 'package:practice_notifications/models/notification_model.dart';
 import 'package:practice_notifications/pages/background_app_notification_screen.dart';
 import 'package:practice_notifications/pages/killed_app_notification_screen.dart';
 import 'package:practice_notifications/services/local_notifications.dart';
@@ -56,7 +56,7 @@ class FirebaseMessagingService {
 
     final model = NotificationModel.fromRemoteMessage(message);
 
-    LocalNotificationsService.instance.showNotification(
+    LocalNotificationsService.instance.showInstantNotification(
       id: message.notification.hashCode,
       title: message.notification?.title,
       body: message.notification?.body,
