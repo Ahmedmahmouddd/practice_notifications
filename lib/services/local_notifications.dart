@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:practice_notifications/main.dart';
 import 'package:practice_notifications/model/notification_model.dart';
 import 'package:practice_notifications/pages/foreground_app_notification_screen.dart';
+import 'package:practice_notifications/pages/local_notification_screen.dart';
 
 class LocalNotificationsService {
   /// private constructor — can't call from outside
@@ -10,6 +12,36 @@ class LocalNotificationsService {
       LocalNotificationsService._();
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
+
+  String? _pendingPayload;
+
+  void _navigateByPayload(String payload, NavigatorState nav) {
+    if (payload == 'go_to_local_notification_screen') {
+      nav.pushNamed(LocalNotificationScreen.route, arguments: payload);
+      return;
+    }
+    final model = NotificationModel.fromPayload(payload);
+    nav.pushNamed(ForegroundAppNotificationScreen.route, arguments: model);
+  }
+
+  void _handleNotificationTap(String? payload) {
+    if (payload == null) return;
+
+    final nav = navigatorKey.currentState;
+    if (nav == null) {
+      _pendingPayload = payload; // app not mounted yet
+      return;
+    }
+
+    _navigateByPayload(payload, nav);
+  }
+
+  void flushPendingNavigation() {
+    final payload = _pendingPayload;
+    if (payload == null) return;
+    _pendingPayload = null;
+    _handleNotificationTap(payload);
+  }
 
   Future<void> init() async {
     await _plugin.initialize(
@@ -20,15 +52,19 @@ class LocalNotificationsService {
 
       /// For when user tabs on the notification
       onDidReceiveNotificationResponse: (details) {
-        if (details.payload == null) return;
-        final model = NotificationModel.fromPayload(details.payload!);
-
-        navigatorKey.currentState?.pushNamed(
-          ForegroundAppNotificationScreen.route,
-          arguments: model,
-        );
+        _handleNotificationTap(details.payload);
       },
     );
+
+    /// Cold start tap (app was terminated)
+    final NotificationAppLaunchDetails? launchDetails = await _plugin
+        .getNotificationAppLaunchDetails();
+
+    if (launchDetails?.didNotificationLaunchApp ?? false) {
+      final NotificationResponse? response =
+          launchDetails!.notificationResponse;
+      _handleNotificationTap(response?.payload);
+    }
 
     await _plugin
         .resolvePlatformSpecificImplementation<

@@ -6,6 +6,7 @@ import 'package:practice_notifications/pages/background_app_notification_screen.
 import 'package:practice_notifications/pages/foreground_app_notification_screen.dart';
 import 'package:practice_notifications/pages/home_screen.dart';
 import 'package:practice_notifications/pages/killed_app_notification_screen.dart';
+import 'package:practice_notifications/pages/local_notification_screen.dart';
 import 'package:practice_notifications/services/firebase_messaging.dart';
 import 'package:practice_notifications/services/local_notifications.dart';
 
@@ -21,8 +22,21 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LocalNotificationsService.instance.flushPendingNavigation();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +57,7 @@ class MyApp extends StatelessWidget {
             BackGroundAppNotificationScreen(),
         ForegroundAppNotificationScreen.route: (context) =>
             ForegroundAppNotificationScreen(),
+        LocalNotificationScreen.route: (context) => LocalNotificationScreen(),
       },
     );
   }
